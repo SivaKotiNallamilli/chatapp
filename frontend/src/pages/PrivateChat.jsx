@@ -41,8 +41,8 @@ function PrivateChat() {
     }
   };
 
- // eslint-disable-next-line react-hooks/exhaustive-deps
-useEffect(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
     socket.off("receive_private_message");
 
     socket.off("private_user_typing");
@@ -63,6 +63,7 @@ useEffect(() => {
     // RECEIVE PRIVATE MESSAGE
     socket.on("receive_private_message", (newMessage) => {
       console.log("NEW PRIVATE MESSAGE:", newMessage);
+
       setMessages((prev) => [...prev, newMessage]);
     });
 
@@ -97,6 +98,8 @@ useEffect(() => {
 
       socket.off("user_status_change");
     };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, user.id]);
 
   // SEND PRIVATE MESSAGE
@@ -261,52 +264,41 @@ useEffect(() => {
               background: "#f3f4f6",
             }}
           >
-             {messages.map((msg, index) => (
-            <div
-              key={index}
-              style={{
-                display: "flex",
-                justifyContent:
-                  msg.senderId === user.id
-                    ? "flex-end"
-                    : "flex-start",
-                marginBottom: "15px",
-              }}
-            >
+            {messages.map((msg, index) => (
               <div
+                key={index}
                 style={{
-                  background:
-                    msg.senderId === user.id
-                      ? "#2563eb"
-                      : "white",
-                  color:
-                    msg.senderId === user.id
-                      ? "white"
-                      : "black",
-                  padding: "12px 16px",
-                  borderRadius: "15px",
-                  maxWidth: "60%",
-                  boxShadow:
-                    "0px 2px 5px rgba(0,0,0,0.1)",
+                  display: "flex",
+                  justifyContent:
+                    msg.senderId === user.id ? "flex-end" : "flex-start",
+                  marginBottom: "15px",
                 }}
               >
-                <strong>
-                  {msg.senderId === user.id
-                    ? "You"
-                    : `${msg.senderName}`}
-                </strong>
-
-                <p
+                <div
                   style={{
-                    marginTop: "5px",
-                    marginBottom: "0",
+                    background: msg.senderId === user.id ? "#2563eb" : "white",
+                    color: msg.senderId === user.id ? "white" : "black",
+                    padding: "12px 16px",
+                    borderRadius: "15px",
+                    maxWidth: "60%",
+                    boxShadow: "0px 2px 5px rgba(0,0,0,0.1)",
                   }}
                 >
-                  {msg.content}
-                </p>
+                  <strong>
+                    {msg.senderId === user.id ? "You" : `${msg.senderName}`}
+                  </strong>
+
+                  <p
+                    style={{
+                      marginTop: "5px",
+                      marginBottom: "0",
+                    }}
+                  >
+                    {msg.content}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
           {/* TYPING */}
 
