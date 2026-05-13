@@ -39,8 +39,8 @@ function ChatRoom() {
     }
   };
 
-  // SOCKET + ROOM
-  useEffect(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+useEffect(() => {
     // JOIN ROOM
     socket.emit("join_room", roomId);
 

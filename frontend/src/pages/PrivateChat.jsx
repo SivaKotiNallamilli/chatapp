@@ -41,8 +41,8 @@ function PrivateChat() {
     }
   };
 
-  // SOCKET
-  useEffect(() => {
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+useEffect(() => {
     socket.off("receive_private_message");
 
     socket.off("private_user_typing");
