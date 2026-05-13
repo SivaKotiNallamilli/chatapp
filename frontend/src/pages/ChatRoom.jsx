@@ -41,8 +41,12 @@ function ChatRoom() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+
+    if(!user?.id) return;
+
+    const numericRoomId = Number(roomId);
     // JOIN ROOM
-    socket.emit("join_room", roomId);
+    socket.emit("join_room", numericRoomId);
 
     socket.off("receive_message");
 
@@ -97,7 +101,7 @@ function ChatRoom() {
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [roomId, user.id]);
+  }, [roomId]);
 
   // SEND MESSAGE
   const sendMessage = () => {
@@ -106,9 +110,9 @@ function ChatRoom() {
     const messageData = {
       content: message,
       senderId: user.id,
-      roomId,
-      senderName: localStorage.getItem("username"),
-      senderEmail: localStorage.getItem("email"),
+      roomId: Number(roomId),
+      senderName: user.username,
+      senderEmail: user.email,
     };
 
     socket.emit("send_message", messageData);
