@@ -97,7 +97,7 @@ function PrivateChat() {
 
       socket.off("user_status_change");
     };
-  }, [conversationId]);
+  }, [conversationId, user.id]);
 
   // SEND PRIVATE MESSAGE
   const sendMessage = () => {
