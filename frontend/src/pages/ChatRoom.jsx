@@ -95,7 +95,7 @@ function ChatRoom() {
 
       socket.off("user_typing");
     };
-  }, [roomId]);
+  }, [roomId, user.id]);
 
   // SEND MESSAGE
   const sendMessage = () => {
