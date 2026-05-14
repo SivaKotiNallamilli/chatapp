@@ -80,46 +80,42 @@ io.on("connection", (socket) => {
 
   // USER ONLINE
   socket.on("user_online", async (userId) => {
+  try {
+    console.log("USER ONLINE EVENT:", userId);
 
-    try {
+    socket.userId = Number(userId);
 
-      socket.userId = userId;
+    await User.update(
+      { status: "online" },
+      { where: { id: userId } }
+    );
 
-      await User.update(
-        { status: "online" },
-        {
-          where: { id: userId },
-        }
-      );
+    io.emit("user_status_change", {
+      userId,
+      status: "online",
+    });
 
-      io.emit("user_status_change", {
-        userId,
-        status: "online",
-      });
-
-      console.log(`User ${userId} is online`);
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
-
-  });
+  } catch (error) {
+    console.log("USER ONLINE ERROR:", error);
+  }
+});
 
   // JOIN PUBLIC ROOM
-  socket.on(
-    "join_room",
-    (roomId) => {
+  socket.on("join_room", (roomId) => {
+  try {
+    const room = `room_${roomId}`;
 
-      const room = `room_${roomId}`;
+    socket.join(room);
 
-      socket.join(room);
+    console.log("JOINED ROOM:", room);
 
-      console.log(`Joined ${room}`);
+    // 🔥 ADD THIS DEBUG
+    socket.emit("joined_room_success", roomId);
 
-    }
-  );
+  } catch (error) {
+    console.log("JOIN ROOM ERROR:", error);
+  }
+});
 
   // JOIN PRIVATE ROOM
   socket.on(
@@ -139,44 +135,34 @@ io.on("connection", (socket) => {
   );
 
   // SEND PUBLIC MESSAGE
-  socket.on(
-    "send_message",
-    async (data) => {
+  socket.on("send_message", async (data) => {
+  try {
+    console.log("MESSAGE RECEIVED:", data);
 
-      try {
-
-        const newMessage =
-          await Message.create({
-
-            content: data.content,
-
-            senderId: data.senderId,
-
-            senderName: data.senderName,
-
-            senderEmail: data.senderEmail,
-
-            roomId: parseInt(
-              data.roomId
-            ),
-
-          });
-
-        io.to(
-          `room_${data.roomId}`
-        ).emit(
-          "receive_message",
-          newMessage
-        );
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-
+    if (!data.content || !data.roomId) {
+      console.log("INVALID MESSAGE DATA");
+      return;
     }
-  );
+
+    const newMessage = await Message.create({
+      content: data.content,
+      senderId: Number(data.senderId),
+      senderName: data.senderName,
+      senderEmail: data.senderEmail,
+      roomId: Number(data.roomId),
+    });
+
+    console.log("MESSAGE SAVED:", newMessage);
+
+    io.to(`room_${data.roomId}`).emit(
+      "receive_message",
+      newMessage
+    );
+
+  } catch (error) {
+    console.log("MESSAGE ERROR:", error);
+  }
+});
 
   // SEND PRIVATE MESSAGE
   socket.on(
@@ -254,56 +240,43 @@ io.on("connection", (socket) => {
   );
 
   // PUBLIC TYPING
-  socket.on(
-    "typing",
-    (data) => {
+  socket.on("typing", (data) => {
+  try {
+    console.log("TYPING EVENT:", data);
 
-      socket.to(
-        `room_${data.roomId}`
-      ).emit(
-        "user_typing",
-        {
-          username: data.username,
-        }
-      );
+    socket.to(`room_${data.roomId}`).emit(
+      "user_typing",
+      {
+        username: data.username,
+      }
+    );
 
-    }
-  );
+  } catch (error) {
+    console.log("TYPING ERROR:", error);
+  }
+});
 
   // USER DISCONNECT
   socket.on("disconnect", async () => {
+  try {
+    console.log("USER DISCONNECTED:", socket.userId);
 
-    console.log("User Disconnected");
+    if (!socket.userId) return;
 
-    try {
+    await User.update(
+      { status: "offline" },
+      { where: { id: socket.userId } }
+    );
 
-      if (socket.userId) {
+    io.emit("user_status_change", {
+      userId: socket.userId,
+      status: "offline",
+    });
 
-        await User.update(
-          { status: "offline" },
-          {
-            where: { id: socket.userId },
-          }
-        );
-
-        io.emit("user_status_change", {
-          userId: socket.userId,
-          status: "offline",
-        });
-
-        console.log(
-          `User ${socket.userId} is offline`
-        );
-
-      }
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
-
-  });
+  } catch (error) {
+    console.log("DISCONNECT ERROR:", error);
+  }
+});
 
 });
 
